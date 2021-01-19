@@ -1,0 +1,27 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Main Page
+{% endblock %}
+
+{% block main %}
+    <div class="container d-flex justify-content-center">
+        <div class="jumbotron bg-light">
+            <h1 class="display-4 d-flex justify-content-center">Better Don't Ask Mate</h1>
+            <p class="lead d-flex justify-content-center">Unless you have to. All your mates will try their best to help you out!</p>
+            <hr class="my-4">
+            <p>In here you can:</p>
+            <a href="{{ url_for("questions.ask_question") }}"><button type="button" class="btn btn-outline-primary">Ask a Question</button></a>
+            <a href="{{ url_for("questions.list_questions") }}"><button type="button" class="btn btn-outline-secondary">See Others Questions</button></a>
+            {% if not current_user.is_authenticated %}
+                <p class="text-muted my-2">If you don't want to be anonymous nerd:</p>
+                <a href="{{ url_for("users.login") }}"><button class="btn btn-outline-success">Sign In</button></a> <span class="text-muted">or</span>
+                <a href="{{ url_for("users.register") }}"><button class="btn btn-outline-info">Sign Up</button></a>
+            {% else %}
+                <h3 class="display-4 mt-2">Welcome, {{ current_user.username }}</h3>
+            {% endif %}
+                </div>
+        </div>
+    </div>
+{% endblock %}

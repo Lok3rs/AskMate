@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ question.title }}
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="jumbotron bg-light">
+            <h2 class="display-4 text-center">
+                {% if current_user.id == question.author.id %}
+                    <a href="{{ url_for("questions.edit_question", question_id = question.id) }}" class="text-warning h3">
+                        <i class="far fa-edit"></i>
+                    </a>
+                {% endif %}
+                {{ question.title }}
+                {% if current_user.id == question.author.id %}
+                    <button class="text-danger btn btn-lg p-0" data-toggle="modal" data-target="#deleteQuestionModal">
+                        <i class="far fa-trash-alt m-0"></i>
+                    </button>
+                {% endif %}
+            </h2>
+            <p class="text-center">
+                        <a class="text-success mr-3" href="{{ url_for("questions.vote_on_question", question_id = question.id ,vote_option="up") }}">
+                            <i class="far fa-thumbs-up"></i>
+                        </a>
+                        Rating:
+                        {% if question.vote_number == 0 %}
+                            <span>{{ question.vote_number }}</span>
+                        {% elif question.vote_number > 0 %}
+                            <span class="text-success">{{ question.vote_number }}</span>
+                        {% else %}
+                            <span class="text-danger">{{ question.vote_number }}</span>
+                        {% endif %}
+                        <a class="text-danger ml-3" href="{{ url_for("questions.vote_on_question", question_id = question.id, vote_option="down") }}">
+                            <i class="far fa-thumbs-down"></i>
+                        </a>
+            </p>
+            <hr class="my-2"/>
+            <p class="text-muted">
+                <img src="{{ url_for("static", filename="profile_pics/" + question.author.image_file) }}" alt="Picture should be here" class="rounded-circle img-thumbnail">
+                <a href="{{ url_for("users.user_info", username=question.author.username) }}">
+                    {{ question.author.username }}
+                </a>
+            </p>
+            {% if question.image %}
+                <div class="container d-flex justify-content-center my-3">
+                    <img src="{{ url_for("static", filename = "upload/" + question.image)}}" alt="Picture should be here" class="img-fluid col-6 float-left">
+                    {{ question.message }}
+                </div>
+            {% else %}
+                <p>
+                    {{ question.message }}
+                </p>
+            {%  endif %}
+            <p class="text-muted text-right">
+                Views: {{ question.view_number }}
+            </p>
+            <a href="{{ url_for("answers.post_an_answer", question_id = question.id)}}" class="btn btn-outline-info">
+                Answer
+            </a>
+        </div>
+
+        <div class="container">
+            {% if answers %}
+                <h2 class="display-4 text-left">
+                    Answers:
+                </h2>
+                <hr>
+                {% for answer in answers %}
+                    {% if current_user == answer.author %}
+                        <a href="{{ url_for("answers.edit_answer", answer_id = answer.id) }}" class="text-warning">
+                            <i class="far fa-edit"></i>
+                        </a>
+                        <button class="text-danger btn btn-lg p-0" data-toggle="modal" data-target="#deleteAnswerModal">
+                            <i class="far fa-trash-alt m-0"></i>
+                        </button>
+                    {% endif %}
+                    <p class="mb-1">
+                        {{ answer.message }}
+                    </p>
+                    {% if answer.image %}
+                        <div class="container d-flex justify-content-center my-3">
+                            <img src="{{ url_for("static", filename = "upload/" + answer.image) }}" alt="Picture should be here" class="img-fluid col-4">
+                        </div>
+                    {% endif %}
+                    <p class="mb-0">
+                            <a class="text-success mr-3" href="{{ url_for("answers.vote_on_answer", answer_id = answer.id ,vote_option = "up", question_id = question.id) }}">
+                                <i class="far fa-thumbs-up"></i>
+                            </a>
+                            Rating:
+                            {% if answer.vote_number == 0 %}
+                                <span>{{ answer.vote_number }}</span>
+                            {% elif answer.vote_number > 0 %}
+                                <span class="text-success">{{ answer.vote_number }}</span>
+                            {% else %}
+                                <span class="text-danger">{{ answer.vote_number }}</span>
+                            {% endif %}
+                            <a class="text-danger ml-3" href="{{ url_for("answers.vote_on_answer", answer_id = answer.id, vote_option="down", question_id = question.id) }}">
+                                <i class="far fa-thumbs-down"></i>
+                            </a>
+                    </p>
+                    <p>
+                        <span class="text-muted">
+                            Posted at {{ answer.submission_time }} by
+                            <a href="{{ url_for("users.user_info", username=answer.author.username) }}">
+                            {{ answer.author.username }}
+                            </a>
+                        </span>
+                    </p>
+                    <hr>
+
+                    <!-- Delete Answer Modal -->
+                    <div class="modal fade" id="deleteAnswerModal" tabindex="-1" role="dialog" aria-labelledby="deleteAnswerModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteAnswerModalLabel">
+                                        Delete your answer?
+                                    </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">
+                                            &times;
+                                        </span>
+                                    </button>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                        Cancel
+                                    </button>
+                                    <a href="{{ url_for("answers.delete_answer", answer_id = answer.id) }}" class="btn btn-danger">
+                                        Delete
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No answers yet</p>
+            {% endif %}
+            </div>
+        </div>
+
+    <!-- Delete Question Modal -->
+    <div class="modal fade" id="deleteQuestionModal" tabindex="-1" role="dialog" aria-labelledby="deleteQuestionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteQuestionModalLabel">
+                        Delete your question?
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">
+                            &times;
+                        </span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <a href="{{ url_for("questions.delete_question", question_id = question.id) }}" class="btn btn-danger">
+                        Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

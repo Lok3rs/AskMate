@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}
+Questions
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <div class="d-flex justify-content-center align-items-center my-2">
+            <h1 class="text-muted justify-content-center">
+                Mates Questions
+            </h1>
+            <a href="{{ url_for("questions.ask_question") }}" class="btn btn-outline-secondary ml-3">
+                Ask
+            </a>
+        </div>
+        <div class="d-flex justify-content-center align-items-center">
+            <form action="{{ url_for("questions.list_questions") }}" class="form-group d-flex">
+                <input type="text" name="search_phrase" id="search_phrase" placeholder="Search for..." class="form-control"
+                {% if search_phrase | length > 0 %}
+                       value="{{ search_phrase }}"
+                {% endif %}>
+
+                <select name="order_option" id="order_option" class="form-control ml-1">
+                    <option value="new_old">Newest -> Oldest</option>
+                    <option value="old_new">Oldest -> Newest</option>
+                    <option value="best_rate">Best rated</option>
+                    <option value="worst_rate">Worst rated</option>
+                    <option value="most_views">Mostly visited</option>
+                    <option value="least_views">Least visited</option>
+                </select>
+                <input type="submit" value="Filter" class="btn btn-outline-dark mx-2">
+            </form>
+        </div>
+
+        <div class="row" id="questionsContainer">
+        {% if search_phrase | length > 0 %}
+            <div class="col-12 text-center mb-3">
+                <h3>Search result for "{{ search_phrase }}" in questions</h3>
+            </div>
+        {% endif %}
+        {% if questions %}
+            {% for question in questions.items %}
+                <div class="col-6 float-left mb-3">
+                    <div class="card">
+                        <h4 class="card-header">
+                            {{ question.title }}
+                        </h4>
+                        <div class="card-body">
+                            <p class="card-text">
+                                {% if search_phrase not in question.message or search_phrase | length == 0 %}
+                                    {{ question.message[0:50] }}{% if question.message | length > 25 %}...{% endif %}
+                                {% else %}
+                                    {{ question.message }}
+                                {% endif %}
+                            </p>
+                            <p class="card-text mb-1">
+                                Rating:
+                                {% if question.vote_number| int == 0 %}
+                                    <span>{{ question.vote_number  }}</span>
+                                {% elif question.vote_number | int > 0 %}
+                                    <span class="text-success">{{ question.vote_number  }}</span>
+                                {% else %}
+                                    <span class="text-danger">{{ question.vote_number  }}</span>
+                                {% endif %}
+                            </p>
+                            <p class="card-text mt-1">
+                                Views: {{ question.view_number }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for("questions.show_question", question_id = question.id) }}" class="btn btn-outline-dark">
+                                    Read More
+                                </a>
+                                <span class="text-muted">
+                                    Added at {{ question.submission_time.strftime('%Y-%m-%d, %H:%M') }} by
+                                    <a href="{{ url_for("users.user_info", username=question.author.username) }}">
+                                        {{ question.author.username }}
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="container justify-content-center text-center mt-5">
+                <h2>
+                    Sorry, no questions found.
+                </h2>
+                <a href="{{ url_for("questions.ask_question") }}" class="btn btn-lg btn-outline-secondary mb-5">
+                    Ask yours!
+                </a>
+            </div>
+        {% endif %}
+            {% if search_phrase | length > 0 %}
+                <div class="col-12 text-center mb-3">
+                    <h3>
+                        Search result for "{{ search_phrase }}" in answers
+                    </h3>
+                </div>
+                {% if answers %}
+                    <div class="list-group">
+                        {% for answer in answers %}
+                            <p class="list-group-item list-group-item-light">
+                                {{ answer.message }}
+                                <a href="{{ url_for("questions.show_question", question_id=answer.question_id) }}"
+                                   class="btn btn-outline-dark ml-2">
+                                    {{ get_question(answer.question_id).title }}
+                                </a>
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="container justify-content-center text-center mt-5">
+                        <h2>
+                            Sorry, no answers found.
+                        </h2>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        {% for page_num in questions.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if questions.page == page_num %}
+                    <a class="btn btn-info mb-4" href="{{ url_for("questions.list_questions", page=page_num) }}">
+                        {{ page_num }}
+                    </a>
+                {% else %}
+                    <a class="btn btn-outline-info mb-4" href="{{ url_for("questions.list_questions", page=page_num) }}">
+                        {{ page_num }}
+                    </a>
+                {% endif %}
+            {% else %}
+                ...
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <script type="text/javascript" src="{{ url_for("static", filename="js/hilitor.js") }}"></script>
+    <script type="text/javascript">
+            let newHilitor = new Hilitor("questionsContainer")
+            let search_phrase = document.getElementById("search_phrase").value
+            newHilitor.apply(search_phrase)
+    </script>
+
+
+{% endblock %}

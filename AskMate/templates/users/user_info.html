@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %} {{ user.username }} {% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <h1 class="mb-3">{{ user.username }}</h1>
+        <img src="{{ url_for("static", filename="profile_pics/" + user.image_file) }}" alt="">
+        <p>Questions asked: <strong>{{ questions | length }}</strong></p>
+        <p>Questions answered: <strong>{{ answers | length }}</strong></p>
+
+        <div>
+        {% if questions %}
+            <h2>Last 5 questions: </h2>
+            {% for question in questions[:5] %}
+                <p>
+                    <a href="{{ url_for("questions.show_question", question_id=question.id) }}" class="btn btn-outline-info">{{ question.title }}</a>
+                </p>
+            {% endfor %}
+        {% endif %}
+        {% if answers %}
+            <h2>Last 5 answers: </h2>
+            {% for answer in answers[:5] %}
+                <p>
+                    {{ answer.message[:20] }} {% if answer.message | length > 20 %} ... {% endif %}
+                    <a href="{{ url_for("questions.show_question", question_id=answer.question_id) }}" class="btn btn-outline-info">
+                    {{ get_question(answer.question_id).title }}</a>
+                </p>
+            {% endfor %}
+        {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

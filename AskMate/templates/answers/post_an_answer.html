@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <form action="" method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">
+                    {{ legend }}
+                </legend>
+                <div class="form-group">
+                    {{ form.answer.label(class="form-control-label") }}
+                    {% if form.answer.errors %}
+                        {{ form.answer(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.answer.errors %}
+                                <span>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.answer(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                {% if edit and answer.image %}
+                    <div class="d-flex justify-content-center">
+                        <img src="{{ url_for("static", filename="upload/" + answer.image) }}" alt="" class="img-thumbnail my-3">
+                        <a href="{{ url_for("answers.delete_answer_image", answer_id = answer.id) }}" class="text-danger align-self-start mt-3 ml-1">
+                            <i class="far fa-window-close"></i>
+                        </a>
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    {{ form.picture.label() }}
+                    {{ form.picture(class="form-control-file") }}
+                    {% if form.picture.errors %}
+                        {% for error in form.picture.errors %}
+                            <span class="text-danger">
+                                {{ error }}
+                            </span>
+                            <br>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {% if edit %}
+                        {{ form.submit_edit(class="btn btn-outline-info mt-2") }}
+                    {% else %}
+                        {{ form.submit(class="btn btn-outline-info mt-2") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}
